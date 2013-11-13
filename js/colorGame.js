@@ -8,11 +8,6 @@ $(document).ready(function(){
 		end: {color:"rgb(255,255,255)",lineHeight:"0.9em",fontSize:22}
 	});
 
-	// create and start the game object
-	var game = new Game(canvas);
-
-	game.start();
-
 	// initialize the new game button functionality
 	$("#newgame-btn").click(function(){
 		if (!game.locked) {
@@ -20,12 +15,21 @@ $(document).ready(function(){
 		}
 	});
 
+	// create and start the game object
+	var game = new Game(canvas);
+	game.start();
+
 });
 
 // game constants
 var OPACITY_NORMAL = 0.6;
 var OPACITY_CONTROLLED = 0.0;
 var OPACITY_HOVER = 0.0;
+
+// tile states
+var STATE_ACTIVE = "active";
+var STATE_CONTROLLED = "controlled";
+var STATE_DORMANT = "dormant";
 
 function Game(canvas) {
 
@@ -80,7 +84,7 @@ function Game(canvas) {
 	// game variables
 	this.anchor = null;
 	this.controlled = [];
-	// this.adjacentTiles = [];
+	this.active = [];
 
 	this.start = function() {
 
@@ -176,16 +180,16 @@ function Game(canvas) {
 
 				// create the tile object
 				var tile = $("<div>")
-					.addClass("tile")
+					.addClass("tile dormant")
 					.attr("pos","("+[x,y]+")")
 					.data("pos",pos)
 					.data("colorIndex",colorIndex)
-					.css($.extend({ backgroundColor: "rgb("+self.colors[colorIndex]+")"}, posStyles))
+					.css($.extend({ backgroundColor: "rgb("+self.colors[colorIndex]+")", boxShadow: "0px 0px 10px rgba(255,255,255,0.0)"}, posStyles))
 					.appendTo(self.canvas);
 
 				// create the corresponding tile mask
 				var mask = $("<div>")
-					.addClass("tile-mask")
+					.addClass("tile-mask dormant")
 					.attr("pos","("+[x,y]+")")
 					.data("pos",pos)
 					.data("colorIndex",colorIndex)
@@ -197,8 +201,8 @@ function Game(canvas) {
 					var a = _getAnimProperties($(this)),
 						p = {width:a.w,height:a.h,left:a.c.x,top:a.c.y},
 						p_ = {width:a.w*a.s,height:a.h*a.s,left:a.c_.x,top:a.c_.y},
-						o = {opacity: $(this).hasClass("controlled") ? OPACITY_CONTROLLED : OPACITY_NORMAL},
-						o_ = {opacity: $(this).hasClass("controlled") ? OPACITY_CONTROLLED : OPACITY_HOVER},
+						o = {opacity: $(this).hasClass(STATE_CONTROLLED) ? OPACITY_CONTROLLED : OPACITY_NORMAL},
+						o_ = {opacity: $(this).hasClass(STATE_CONTROLLED) ? OPACITY_CONTROLLED : OPACITY_HOVER},
 						c = self.canvas;
 					$(this).stop().css($.extend(o,p)).animate($.extend(o_,p_), a.d);
 					_getTile(a.p).stop().css(p).animate(p_, a.d);
@@ -209,8 +213,8 @@ function Game(canvas) {
 					var a = _getAnimProperties($(this)),
 						p = {width:a.w*a.s,height:a.h*a.s,left:a.c_.x,top:a.c_.y},
 						p_ = {width:a.w,height:a.h,left:a.c.x,top:a.c.y}
-						o = {opacity: $(this).hasClass("controlled") ? OPACITY_CONTROLLED : OPACITY_HOVER},
-						o_ = {opacity: $(this).hasClass("controlled") ? OPACITY_CONTROLLED : OPACITY_NORMAL},
+						o = {opacity: $(this).hasClass(STATE_CONTROLLED) ? OPACITY_CONTROLLED : OPACITY_HOVER},
+						o_ = {opacity: $(this).hasClass(STATE_CONTROLLED) ? OPACITY_CONTROLLED : OPACITY_NORMAL},
 						c = self.canvas;
 					$(this).stop().css($.extend(o,p)).animate($.extend(o_,p_), a.d);
 					_getTile(a.p).stop().css(p).animate(p_, a.d);
@@ -232,15 +236,17 @@ function Game(canvas) {
 
 	function _takeTurn(pos) {
 		var tile = _getTile("("+pos.x+","+pos.y+")");
-		var isControlled = tile.hasClass("controlled");
 		var colorIndex = tile.data("colorIndex");
 
 		// only allow the turn to be taken if it is an uncontrolled piece
-		if (!isControlled) {
+		console.log("-----------------");
+		if (!_isActive(pos)) {
+
+			console.log("here");
 
 			// check if this tile is isolated, if it is isolated then we know that we
 			// are creating a new anchor
-			if (!_isAdjacentToControlled(pos)) {
+			if (!_isAdjacentToActive(pos)) {
 				_setAnchor(pos);
 			} else {
 				// grow the current controlled group
@@ -250,14 +256,18 @@ function Game(canvas) {
 			// increment hte number fo turns taken
 			self.numTurns++;
 		}
+
+
+		console.log(self.active);
+		console.log(self.controlled);
 	}
 
-	function _isAdjacentToControlled(pos) {
-		for (var i=self.controlled.length-1;i>=0;i--) {
-			if (!self.controlled[i]) continue;
+	function _isAdjacentToActive(pos) {
+		for (var i=self.active.length-1;i>=0;i--) {
+			if (!self.active[i]) continue;
 
-			var x = self.controlled[i].x;
-			var y = self.controlled[i].y;
+			var x = self.active[i].x;
+			var y = self.active[i].y;
 			var tile = _getTile("("+x+","+y+")");
 
 			if (pos.x == x-1 && pos.y == y) return true;
@@ -270,15 +280,16 @@ function Game(canvas) {
 
 	function _colorSwap(pos,colorIndex) {
 
-		// add clicked tile to the controlled group
+		// add clicked tile to the controlled and active group
 		_setControlled(pos);
+		_setActive(pos);
 
-		// update all existing controlled tiles (and also check if we can add more to the controlled group)
-		for (var i=self.controlled.length-1;i>=0;i--) {
-			if (!self.controlled[i]) continue;
+		// update all existing active tiles (and also check if we can add more to the active group)
+		for (var i=self.active.length-1;i>=0;i--) {
+			if (!self.active[i]) continue;
 			
-			var x = self.controlled[i].x;
-			var y = self.controlled[i].y;
+			var x = self.active[i].x;
+			var y = self.active[i].y;
 			var tile = _getTile("("+x+","+y+")");
 			var color = "rgb("+self.colors[colorIndex]+")";
 			
@@ -287,18 +298,75 @@ function Game(canvas) {
 				a_ = {backgroundColor:color}, 
 				d = self.tile.animDuration;
 			tile.stop().css(a).animate(a_,d);
-
-
-
-			// see if we can omit this tile now, since it is completely blocked off
-			/*
-			if (pos.x == x-1 && pos.y == y && pos.x == x+1 && pos.y == y &&
-				pos.x == x && pos.y == y-1 && pos.x == x && pos.y == y+1) 
-			{
-				self.adjacent[i] = null;
-			}
-			*/
 		}
+	}
+
+	function _setAnchor(pos) {
+		self.anchor = pos;
+
+		// if we are setting a brand new anchor then we are resetting the
+		// existing set of active tiles
+		_resetActive();
+
+		// set this as a controlled and active tile
+		_setControlled(pos);
+		_setActive(pos);
+
+		// get references to the appropriate components
+		var tile = _getTile("("+pos.x+","+pos.y+")");
+		var mask = _getTileMask("("+pos.x+","+pos.y+")");
+
+		// update the current color index
+		self.currentColor = tile.data("colorIndex");
+	}
+
+	function _setControlled(pos) {
+		var tile = _getTile("("+pos.x+","+pos.y+")");
+		var mask = _getTileMask("("+pos.x+","+pos.y+")");
+
+		// mark the tile as controlled
+		tile.removeClass(STATE_DORMANT).addClass(STATE_CONTROLLED);
+		mask.removeClass(STATE_DORMANT).addClass(STATE_CONTROLLED);
+
+		// update aesthetic for controlled groups
+		mask.css({opacity: OPACITY_CONTROLLED});
+
+		// increment the number of controlled tiles
+		self.numTiles++;
+
+		// push it onto the controlled stack
+		self.controlled.push(pos);
+	}
+
+	function _setActive(pos) {
+		var tile = _getTile("("+pos.x+","+pos.y+")");
+		var mask = _getTileMask("("+pos.x+","+pos.y+")");
+
+		// mark the tile as active
+		tile.removeClass(STATE_DORMANT).addClass(STATE_ACTIVE);
+		mask.removeClass(STATE_DORMANT).addClass(STATE_ACTIVE);
+
+		// update aesthetic for active groups
+		tile.css({boxShadow: "0px 0px 10px rgba(255,255,255,1.0)"});
+
+		// push it onto the active stack
+		self.active.push(pos);
+	}
+
+	function _resetActive() {
+		// go through the current set of active tiles and strip them of active status
+		for (var i=0; i<self.active.length; i++) {
+			if (!self.active[i]) continue;
+
+			var x = self.active[i].x;
+			var y = self.active[i].y;
+			var tile = _getTile("("+x+","+y+")");
+
+			// update aesthetic for active groups
+			tile.css({boxShadow: "0px 0px 10px rgba(255,255,255,0.0)"})
+				.removeClass(STATE_ACTIVE);
+		}
+		self.active = [];
 	}
 
 	function _updateHud(noAnimation) {
@@ -330,42 +398,6 @@ function Game(canvas) {
 				$(this).css({opacity:0.0}).stop().animate({opacity:1.0},duration);
 			});
 		}
-	}
-
-	function _setAnchor(pos) {
-		self.anchor = pos;
-
-		// each time a new anchor is set, we will reset the controlled stack
-		self.controlled = [];
-		_setControlled(pos);
-
-		// get references to the appropriate components
-		var tile = _getTile("("+pos.x+","+pos.y+")");
-		var mask = _getTileMask("("+pos.x+","+pos.y+")");
-
-		// update the current color index
-		self.currentColor = tile.data("colorIndex");
-
-		// mark the tile as the new anchor
-		tile.addClass("anchor");
-		mask.addClass("anchor");
-	}
-
-	function _setControlled(pos) {
-		var tile = _getTile("("+pos.x+","+pos.y+")");
-		var mask = _getTileMask("("+pos.x+","+pos.y+")");
-
-		// mark the tile as controlled
-		tile.addClass("controlled");
-		mask.addClass("controlled");
-
-		mask.css({opacity: OPACITY_CONTROLLED});
-
-		// increment the number of controlled tiles
-		self.numTiles++;
-
-		// push it onto the controlled stack
-		self.controlled.push(pos);
 	}
 
 	// function to report animation properties upon mask hover events
@@ -406,5 +438,10 @@ function Game(canvas) {
 			y: y*(self.tile.height+self.board.vGap) + self.board.vGap
 		};
 	}
+
+	// state checkers
+	function _isActive(pos) { return _getTile("("+pos.x+","+pos.y+")").hasClass(STATE_ACTIVE); }
+	function _isControlled(pos) { return _getTile("("+pos.x+","+pos.y+")").hasClass(STATE_CONTROLLED); }
+	function _isDormant(pos) { return _getTile("("+pos.x+","+pos.y+")").hasClass(STATE_DORMANT); }
 
 }
