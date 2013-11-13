@@ -239,27 +239,20 @@ function Game(canvas) {
 		var colorIndex = tile.data("colorIndex");
 
 		// only allow the turn to be taken if it is an uncontrolled piece
-		console.log("-----------------");
 		if (!_isActive(pos)) {
-
-			console.log("here");
 
 			// check if this tile is isolated, if it is isolated then we know that we
 			// are creating a new anchor
 			if (!_isAdjacentToActive(pos)) {
 				_setAnchor(pos);
 			} else {
-				// grow the current controlled group
+				// change the current color to the new one
 				_colorSwap(pos,colorIndex);
 			}
 
 			// increment hte number fo turns taken
 			self.numTurns++;
 		}
-
-
-		console.log(self.active);
-		console.log(self.controlled);
 	}
 
 	function _isAdjacentToActive(pos) {
@@ -284,7 +277,7 @@ function Game(canvas) {
 		_setControlled(pos);
 		_setActive(pos);
 
-		// update all existing active tiles (and also check if we can add more to the active group)
+		// update color swap aesthetic for active tiles
 		for (var i=self.active.length-1;i>=0;i--) {
 			if (!self.active[i]) continue;
 			
@@ -299,6 +292,32 @@ function Game(canvas) {
 				d = self.tile.animDuration;
 			tile.stop().css(a).animate(a_,d);
 		}
+	}
+
+	function _checkNeighbours(pos) {
+		var tile = _getTile("("+pos.x+","+pos.y+")");
+		var xMin = 0;
+		var xMax = self.board.width - 1;
+		var yMin = 0;
+		var yMax = self.board.height - 1;
+
+		console.log(pos.x,pos.y);
+
+		// recursively check neighbours
+		/*
+		if (pos.x > xMin) {
+			_checkNeighbours({x: pos.x-1, y: pos.y});
+		}
+		if (pos.x < xMax) {
+			_checkNeighbours({x: pos.x+1, y: pos.y});
+		}
+		if (pos.y > yMin) {
+			_checkNeighbours({x: pos.x, y: pos.y-1});
+		}
+		if (pos.y < yMax) {
+			_checkNeighbours({x: pos.x, y: pos.y+1});
+		}
+		*/
 	}
 
 	function _setAnchor(pos) {
@@ -351,6 +370,9 @@ function Game(canvas) {
 
 		// push it onto the active stack
 		self.active.push(pos);
+
+		// see if we can get any more active with adjacent tiles!
+		_checkNeighbours(pos);
 	}
 
 	function _resetActive() {
