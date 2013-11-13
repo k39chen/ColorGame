@@ -2,9 +2,20 @@ $(document).ready(function(){
 
 	var canvas = $("#canvas");
 
+	$(".button").css({userSelect:"none"}).easyHover({
+		start: {color:"rgb(200,200,200)",lineHeight:"1.0em",fontSize:18},
+		end: {color:"rgb(255,255,255)",lineHeight:"0.9em",fontSize:22}
+	});
+
 	var game = new Game(canvas);
 
 	game.start();
+
+	$("#newgame-btn").click(function(){
+		if (!game.locked) {
+			game.restart();
+		}
+	});
 
 });
 
@@ -12,15 +23,21 @@ function Game(canvas) {
 
 	var self = this;
 
+	this.locked = true;
+
 	// constructor
 	this.canvas = canvas;
+	this.startMarker = $("#start-marker");
 	this.board = {
 		width: 16,
-		height: 16,
+		height: 8,
 		hGap: 10,
-		vGap: 10
+		vGap: 10,
+		animDuration: 250,
+		seed: 70
 	};
 	this.tile = {
+		borderRadius: "5px",
 		width: 32,
 		height: 32,
 		scaleBy: 1.3,
@@ -28,15 +45,29 @@ function Game(canvas) {
 	}
 
 	this.start = function() {
-
 		// first we must create the board!
+		self.clear();
 		_createBoard();
-
+		self.startMarker.css({opacity:0.0}).stop().animate({opacity:1.0},self.board.animDuration);
+		self.canvas.css({opacity:0.0}).stop().animate({opacity:1.0},self.board.animDuration,function(){
+			self.locked = false;
+		});
 	};
 
 	this.restart = function() {
-
+		self.clear(function(){
+			self.start()
+		});
 	};
+
+	this.clear = function(cb){
+		self.locked = true;
+		self.startMarker.css({opacity:1.0}).stop().animate({opacity:0.0},self.board.animDuration);
+		self.canvas.css({opacity:1.0}).stop().animate({opacity:0.0},self.board.animDuration,function(){
+			self.canvas.empty();
+			if (cb) cb();
+		})
+	}
 
 	this.gameOver = function() {
 
@@ -55,17 +86,24 @@ function Game(canvas) {
 		for (var y=0; y<self.board.height; y++) {
 			for (var x=0; x<self.board.width; x++) {
 
+				if (x > 0 || y > 0) {
+					if (Math.floor(Math.random()*100) > self.board.seed) continue; 
+				}
+
 				var pos = {x:x,y:y};
 				var coord = _getCoord(x,y);
 				var color = [_getHexValue(),_getHexValue(),_getHexValue()];
 				var posStyles = {
 					position: "absolute",
-					borderRadius: "0",
+					borderRadius: self.tile.borderRadius,
+					borderTop: "solid 1px rgb(180,180,180)",
+					borderBottom: "solid 1px rgb(50,50,50)",
 					width: self.tile.width,
 					height: self.tile.height,
 					left: coord.x,
 					top: coord.y,
 				};
+
 				var tile = $("<div>")
 					.addClass("tile")
 					.attr("pos","("+[x,y]+")")
@@ -80,58 +118,51 @@ function Game(canvas) {
 					.appendTo(self.canvas);
 
 				mask.mouseover(function(){
-
-					var w = self.tile.width;
-					var h = self.tile.height;
-					var s = self.tile.scaleBy;
-					var p = $(this).attr("pos");
-					var d = self.tile.animDuration;
-					var x = $(this).data("pos").x;
-					var y = $(this).data("pos").y;
-					var c = _getCoord(x,y);
-					var c_ = {x:c.x-w*(s-1)/2,y:c.y-h*(s-1)/2};
-
-					var startProp = {width:w,height:h,left:c.x,top:c.y};
-					var endProp = {width:w*s,height:h*s,left:c_.x,top:c_.y};
-
-					// animate the mask
-					$(this).stop()
-						.css($.extend({opacity: 0.4}, startProp))
-						.animate($.extend({opacity: 0.0}, endProp), d);
-					$(".tile[pos='"+p+"']", self.canvas).stop()
-						.css(startProp)
-						.animate(endProp, d);
+					var a = _getAnimProperties($(this)),
+						p = {width:a.w,height:a.h,left:a.c.x,top:a.c.y},
+						p_ = {width:a.w*a.s,height:a.h*a.s,left:a.c_.x,top:a.c_.y},
+						o = {opacity:0.4},
+						o_ = {opacity:0.0},
+						c = self.canvas;
+					$(this).stop().css($.extend(o,p)).animate($.extend(o_,p_), a.d);
+					_getTile(a.p).stop().css(p).animate(p_, a.d);
 				});
 				mask.mouseout(function(){
-
-					var w = self.tile.width;
-					var h = self.tile.height;
-					var s = self.tile.scaleBy;
-					var p = $(this).attr("pos");
-					var d = self.tile.animDuration;
-					var x = $(this).data("pos").x;
-					var y = $(this).data("pos").y;
-					var c = _getCoord(x,y);
-					var c_ = {x:c.x-w*(s-1)/2,y:c.y-h*(s-1)/2};
-
-					var startProp = {width:w*s,height:h*s,left:c_.x,top:c_.y};
-					var endProp = {width:w,height:h,left:c.x,top:c.y};
-					
-					// animate the mask
-					$(this).stop()
-						.css($.extend({opacity: 0.0}, startProp))
-						.animate($.extend({opacity: 0.4}, endProp), d);
-					$(".tile[pos='"+p+"']", self.canvas).stop()
-						.css(startProp)
-						.animate(endProp, d);
+					var a = _getAnimProperties($(this)),
+						p = {width:a.w*a.s,height:a.h*a.s,left:a.c_.x,top:a.c_.y},
+						p_ = {width:a.w,height:a.h,left:a.c.x,top:a.c.y}
+						o = {opacity:0.0},
+						o_ = {opacity:0.4},
+						c = self.canvas;
+					$(this).stop().css($.extend(o,p)).animate($.extend(o_,p_), a.d);
+					_getTile(a.p).stop().css(p).animate(p_, a.d);
 				});
 			}
 		}
+		// set (0,0) as the starting anchor
 
 	};
 
+	// generate predictable set of colors
+	function _getAnimProperties(tileobj) {
+		var w = self.tile.width,
+			h = self.tile.height,
+			s = self.tile.scaleBy,
+			p = tileobj.attr("pos"),
+			d = self.tile.animDuration,
+			x = tileobj.data("pos").x,
+			y = tileobj.data("pos").y,
+			c = _getCoord(x,y),
+			c_ = {x:c.x-w*(s-1)/2,y:c.y-h*(s-1)/2};
+		return {w:w,h:h,s:s,p:p,d:d,x:x,y:y,c:c,c_:c_};
+	}
+
 	function _getHexValue() {
 		return Math.min(255,Math.floor(Math.random()*256)+100);
+	}
+
+	function _getTile(pos) {
+		return $("#tile[pos='"+[pos.x,pos.y]+"']", self.canvas);
 	}
 
 	function _getCoord(x,y) {
