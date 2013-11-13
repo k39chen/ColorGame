@@ -13,6 +13,7 @@
 
 		<link rel="stylesheet" type="text/css" href="css/reset.css" />
 		<link rel="stylesheet" type="text/css" href="css/fonts.css" />
+		<link rel="stylesheet" type="text/css" href="css/util.css" />
 		<link rel="stylesheet" type="text/css" href="css/main.css" />
 
 	</head>
@@ -21,9 +22,32 @@
 		<div id="container">
 			<h1>Color Game</h1>
 		
-			<div class="divider"></div>
+			
 
-			<img id="start-marker" src="assets/images/start_here.png" />
+			<div id="firstDivider" class="divider"></div>
+
+			<div id="hud" class="wrapper">
+				<img id="start-marker" class="pull-left" src="assets/images/start_here.png" />
+
+				<div id="turns-container" class="pull-right">
+					<div id="turns-counter">
+						<span id="turns-taken">50</span>
+						<span id="turns-separator">/</span>
+						<span id="turns-total">100</span>
+					</div>
+					<div id="turns-label">TURNS TAKEN</div>
+				</div>
+
+				<div id="completion-container" class="pull-right">
+					<div id="completion-counter">
+						<span id="completion-taken">78</span>
+						<span id="completion-separator">/</span>
+						<span id="completion-total">126</span>
+					</div>
+					<div id="completion-label">CONTROLLED</div>
+				</div>
+			</div>
+
 
 			<div id="canvas"></div>
 
