@@ -89,12 +89,13 @@ function Game(canvas) {
 			o_ = {opacity:1.0}, 
 			d = self.board.animDuration;
 
+		// reset the primary game metrics
+		this.numTurns = 0;
+		this.numTiles = 0;
+
 		// first we must create the board!
 		self.clear();
 		_createBoard();
-
-		// reset the number of turns taken
-		this.numTurns = 0;
 
 		// fade everything into existence
 		self.startMarker.css(o).stop().animate(o_,d);
