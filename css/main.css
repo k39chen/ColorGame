@@ -1,0 +1,16 @@
+body {
+	font-family: HelveticaNeue;
+	font-size: 18px;
+	background: rgb(20,20,20);
+	color: rgb(230,230,230);
+}
+#container {
+	width: 960px;
+	margin: 120px auto;
+}
+h1 {
+	font-family: HelveticaNeueUltLt;
+	text-align: center;
+	font-size: 48px;
+	margin-bottom: 20px;
+}
