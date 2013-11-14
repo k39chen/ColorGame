@@ -67,7 +67,7 @@ function Game(canvas) {
 	// set of colors
 	this.numColors = 5;
 	this.colors = [];
-	this.currentColor = -1;
+	this.currentColorIndex = -1;
 
 	// game metrics
 	this.numTiles = 0;
@@ -241,6 +241,9 @@ function Game(canvas) {
 		// only allow the turn to be taken if it is an uncontrolled piece
 		if (!_isActive(pos)) {
 
+			// update the current color index
+			self.currentColorIndex = tile.data("colorIndex");
+
 			// check if this tile is isolated, if it is isolated then we know that we
 			// are creating a new anchor
 			if (!_isAdjacentToActive(pos)) {
@@ -274,7 +277,6 @@ function Game(canvas) {
 	function _colorSwap(pos,colorIndex) {
 
 		// add clicked tile to the controlled and active group
-		_setControlled(pos);
 		_setActive(pos);
 
 		// update color swap aesthetic for active tiles
@@ -291,33 +293,9 @@ function Game(canvas) {
 				a_ = {backgroundColor:color}, 
 				d = self.tile.animDuration;
 			tile.stop().css(a).animate(a_,d);
-		}
-	}
 
-	function _checkNeighbours(pos) {
-		var tile = _getTile("("+pos.x+","+pos.y+")");
-		var xMin = 0;
-		var xMax = self.board.width - 1;
-		var yMin = 0;
-		var yMax = self.board.height - 1;
-
-		console.log(pos.x,pos.y);
-
-		// recursively check neighbours
-		/*
-		if (pos.x > xMin) {
-			_checkNeighbours({x: pos.x-1, y: pos.y});
+			tile.data("colorIndex",colorIndex);
 		}
-		if (pos.x < xMax) {
-			_checkNeighbours({x: pos.x+1, y: pos.y});
-		}
-		if (pos.y > yMin) {
-			_checkNeighbours({x: pos.x, y: pos.y-1});
-		}
-		if (pos.y < yMax) {
-			_checkNeighbours({x: pos.x, y: pos.y+1});
-		}
-		*/
 	}
 
 	function _setAnchor(pos) {
@@ -327,16 +305,12 @@ function Game(canvas) {
 		// existing set of active tiles
 		_resetActive();
 
-		// set this as a controlled and active tile
-		_setControlled(pos);
-		_setActive(pos);
-
 		// get references to the appropriate components
 		var tile = _getTile("("+pos.x+","+pos.y+")");
 		var mask = _getTileMask("("+pos.x+","+pos.y+")");
 
-		// update the current color index
-		self.currentColor = tile.data("colorIndex");
+		// set this as a controlled and active tile
+		_setActive(pos);
 	}
 
 	function _setControlled(pos) {
@@ -350,11 +324,11 @@ function Game(canvas) {
 		// update aesthetic for controlled groups
 		mask.css({opacity: OPACITY_CONTROLLED});
 
-		// increment the number of controlled tiles
-		self.numTiles++;
-
 		// push it onto the controlled stack
 		self.controlled.push(pos);
+
+		// update the number of controlled tiles
+		self.numTiles = self.controlled.length;
 	}
 
 	function _setActive(pos) {
@@ -368,11 +342,54 @@ function Game(canvas) {
 		// update aesthetic for active groups
 		tile.css({boxShadow: "0px 0px 10px rgba(255,255,255,1.0)"});
 
+		// if this tile is active, then it must also be controlled
+		_setControlled(pos);
+
 		// push it onto the active stack
 		self.active.push(pos);
 
 		// see if we can get any more active with adjacent tiles!
-		_checkNeighbours(pos);
+		_checkNeighbours();
+	}
+
+	function _checkNeighbours() {
+		var xMin = 0;
+		var xMax = self.board.width - 1;
+		var yMin = 0;
+		var yMax = self.board.height - 1;
+
+		var queue = self.active.slice(0);
+
+		while (queue.length > 0) {
+			var pos = queue.shift();
+
+			var adjacentTiles = [
+				{x: pos.x-1, y: pos.y},
+				{x: pos.x+1, y: pos.y},
+				{x: pos.x, y: pos.y-1},
+				{x: pos.x, y: pos.y+1}
+			];
+
+			for (var i=0; i<adjacentTiles.length; i++) {
+				var p = adjacentTiles[i], x = p.x, y = p.y;
+				var tile = _getTile("("+x+","+y+")");
+				var colorIndex = tile.data("colorIndex");
+			
+				// if it doesn't satisfy our constraints then don't bother looking
+				// at this neighbouring tile
+				if (x < xMin || x > xMax || y < yMin || y > yMax) continue;
+
+				// check if this tile is already in our active list
+				var isActive = _isActive(p);
+
+				// only add inactive tiles that match our color of interest
+				if (!isActive && colorIndex == self.currentColorIndex) {
+					_setActive(p);
+					// ...
+					console.log(p);
+				}
+			}
+		}
 	}
 
 	function _resetActive() {
