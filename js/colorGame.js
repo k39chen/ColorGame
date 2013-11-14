@@ -317,18 +317,19 @@ function Game(canvas) {
 		var tile = _getTile("("+pos.x+","+pos.y+")");
 		var mask = _getTileMask("("+pos.x+","+pos.y+")");
 
+		// push it onto the controlled stack, if it isn't controlled
+		if (!_isControlled(pos)) {
+			self.controlled.push(pos);
+		}
+		// update the number of controlled tiles
+		self.numTiles = self.controlled.length;
+
 		// mark the tile as controlled
 		tile.removeClass(STATE_DORMANT).addClass(STATE_CONTROLLED);
 		mask.removeClass(STATE_DORMANT).addClass(STATE_CONTROLLED);
 
 		// update aesthetic for controlled groups
 		mask.css({opacity: OPACITY_CONTROLLED});
-
-		// push it onto the controlled stack
-		self.controlled.push(pos);
-
-		// update the number of controlled tiles
-		self.numTiles = self.controlled.length;
 	}
 
 	function _setActive(pos) {
@@ -385,8 +386,6 @@ function Game(canvas) {
 				// only add inactive tiles that match our color of interest
 				if (!isActive && colorIndex == self.currentColorIndex) {
 					_setActive(p);
-					// ...
-					console.log(p);
 				}
 			}
 		}
