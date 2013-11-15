@@ -65,7 +65,7 @@ function Game(canvas) {
 	};
 
 	// set of colors
-	this.numColors = 5;
+	this.numColors = 7;
 	this.colors = [];
 	this.currentColorIndex = -1;
 
@@ -99,6 +99,8 @@ function Game(canvas) {
 
 		// first we must create the board!
 		self.clear();
+		self.active = [];
+		self.controlled = [];
 		_createBoard();
 
 		// fade everything into existence
