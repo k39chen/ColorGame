@@ -25,7 +25,6 @@ var OPACITY_CONTROLLED = 0.0;
 var OPACITY_HOVER = 0.0;
 
 // tile states
-var STATE_ACTIVE 	 = "controlled";
 var STATE_CONTROLLED = "controlled";
 var STATE_DORMANT 	 = "dormant";
 
@@ -117,6 +116,8 @@ function Game() {
 			self.locked = false;
 		});
 
+		self.numTurns = 0;
+
 		// update the HUD, don't animate the text!
 		_updateHud(true);
 	};
@@ -166,7 +167,8 @@ function Game() {
 		//   ...
 		var turnsMin = Math.min(5 * (self.numColors - 1),20);
 		var turnsBuffer = Math.min(2 * (self.numColors - 2),10);
-		self.totalTurns = turnsMin + turnsBuffer;
+		var turnRandom = Math.floor(Math.random() * 4);
+		self.totalTurns = turnsMin + turnsBuffer + turnRandom;
 
 		// allow the canvas to accept absolute positioned elements within it
 		self.canvas.css({
@@ -203,6 +205,7 @@ function Game() {
 				var tile = $("<div>")
 					.addClass("tile dormant")
 					.attr("pos","("+[x,y]+")")
+					.attr("colorIndex",colorIndex)
 					.data("pos",pos)
 					.data("colorIndex",colorIndex)
 					.css($.extend({ backgroundColor: "rgb("+self.colors[colorIndex]+")", boxShadow: "0px 0px 10px rgba(255,255,255,0.0)"}, posStyles))
@@ -212,6 +215,7 @@ function Game() {
 				var mask = $("<div>")
 					.addClass("tile-mask dormant")
 					.attr("pos","("+[x,y]+")")
+					.attr("colorIndex",colorIndex)
 					.data("pos",pos)
 					.data("colorIndex",colorIndex)
 					.css($.extend({opacity:OPACITY_NORMAL, backgroundColor:"black",cursor:"pointer"}, posStyles))
@@ -264,8 +268,8 @@ function Game() {
 			textAlign: "center"
 		});
 
-		var width = self.tile.width/2;
-		var height = self.tile.height/2;
+		var width = self.tile.width;
+		var height = self.tile.height;
 
 		for (var i=0; i<self.colors.length; i++) {
 			var container = $("<div>")
@@ -310,9 +314,21 @@ function Game() {
 
 			mask.mouseover(function(){
 				$(this).css({opacity:OPACITY_NORMAL}).stop().animate({opacity: OPACITY_HOVER}, self.tile.animDuration);
+			
+				$(".tile-mask[colorIndex='"+$(this).data("colorIndex")+"']").each(function(){
+					if ($(this).hasClass(STATE_DORMANT)) {
+						$(this).css({opacity: OPACITY_HOVER});
+					}
+				});
 			});
 			mask.mouseout(function(){
 				$(this).css({opacity:OPACITY_HOVER}).stop().animate({opacity: OPACITY_NORMAL}, self.tile.animDuration);
+			
+				$(".tile-mask[colorIndex='"+$(this).data("colorIndex")+"']").each(function(){
+					if ($(this).hasClass(STATE_DORMANT)) {
+						$(this).css({opacity:OPACITY_NORMAL});	
+					}
+				});
 			});
 			mask.click(function(){
 				_colorSwap($(this).data("colorIndex"));
@@ -563,9 +579,9 @@ function Game() {
 					"<b>"+self.numTurns+"</b> turns!";
 			} else if (easeOfCompletion >= 0.5) {
 				modalMessage = 
-					"<b>WOOOW!</b>"+
+					"<b>WOW!</b>"+
 					"<br>You have successfully controlled "+
-					"<b>"+self.totalTiles+"</b>"+" tiles in just"+
+					"<b>"+self.totalTiles+"</b>"+" tiles in just "+
 					"<b>"+self.numTurns+"</b> turns!";
 			} else {
 				modalMessage = 
