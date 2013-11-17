@@ -1,7 +1,5 @@
 $(document).ready(function(){
 
-	var canvas = $("#canvas");
-
 	// initialize UI elements
 	$(".button").css({userSelect:"none"}).easyHover({
 		start: {color:"rgb(200,200,200)",lineHeight:"1.0em",fontSize:18},
@@ -16,7 +14,7 @@ $(document).ready(function(){
 	});
 
 	// create and start the game object
-	var game = new Game(canvas);
+	var game = new Game();
 	game.start();
 
 });
@@ -31,7 +29,7 @@ var STATE_ACTIVE 	 = "controlled";
 var STATE_CONTROLLED = "controlled";
 var STATE_DORMANT 	 = "dormant";
 
-function Game(canvas) {
+function Game() {
 
 	// reference to own object
 	var self = this;
@@ -40,7 +38,8 @@ function Game(canvas) {
 	this.locked = true;
 
 	// game components
-	this.canvas = canvas;
+	this.elem = $("#game");
+	this.canvas = $("#canvas");
 	this.controlBar = $("#controlBar")
 	this.startMarker = $("#start-marker");
 	this.turnsCounter = $("#turns-container");
@@ -327,11 +326,13 @@ function Game(canvas) {
 			.attr("id","modal")
 			.css({
 				position: "absolute",
-				width: self.canvas.width(),
-				height: self.canvas.height(),
+				top: self.elem.offset().top,
+				left: self.elem.offset().left,
+				width: self.elem.width(),
+				height: self.elem.height(),
 				background: "rgb(20,20,20)"
 			})
-			.appendTo(self.canvas);
+			.appendTo(self.elem);
 		var message = $("<div>")
 			.attr("id","modal-message")
 			.css({
@@ -446,7 +447,7 @@ function Game(canvas) {
 
 		// set this as a controlled tile
 		_setControlled(pos);
-		
+
 		// update the player variables
 		self.numTiles = self.controlled.length;
 		self.numTurns++;
