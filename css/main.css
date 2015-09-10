@@ -1,69 +1,69 @@
 body {
-	font-family: HelveticaNeue;
-	font-size: 18px;
-	background: rgb(20,20,20);
-	color: rgb(230,230,230);
+    font-family: HelveticaNeue;
+    font-size: 18px;
+    background: rgb(20,20,20);
+    color: rgb(230,230,230);
 }
 #container {
-	width: 960px;
-	margin: 80px auto;
+    width: 960px;
+    margin: 80px auto;
 }
 h1 {
-	font-family: HelveticaNeueUltLt;
-	text-align: center;
-	font-size: 48px;
+    font-family: HelveticaNeueUltLt;
+    text-align: center;
+    font-size: 48px;
 }
 .divider {
-	width: 100%;
-	height: 1px;
-	background: -webkit-linear-gradient(left, rgba(255,255,255,0), rgba(255,255,255,0.3), rgba(255,255,255,0));
-	margin: 48px 0px;
+    width: 100%;
+    height: 1px;
+    background: -webkit-linear-gradient(left, rgba(255,255,255,0), rgba(255,255,255,0.3), rgba(255,255,255,0));
+    margin: 48px 0px;
 }
 #firstDivider {
-	margin: 16px 25%;
-	margin-bottom: 0px;
-	width: 50%;
+    margin: 16px 25%;
+    margin-bottom: 0px;
+    width: 50%;
 }
 
 #controls {
-	text-align: center;
+    text-align: center;
 }
 .button {
-	display: inline-block;
-	cursor: pointer;
-	text-transform: uppercase;
-	font-family: HelveticaNeueLt;
+    display: inline-block;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-family: HelveticaNeueLt;
 }
 #start-marker {
-	margin-left: 12px;
+    margin-left: 12px;
 }
 
 #hud {
-	margin-top: 32px;
-	height: 72px;
+    margin-top: 32px;
+    height: 72px;
 }
 #turns-container, #completion-container {
-	text-align: center;
+    text-align: center;
 }
 #turns-container {
-	margin-right: 144px;
+    margin-right: 144px;
 }
 #completion-container {
-	margin-right: 218px;
+    margin-right: 218px;
 }
 #turns-counter, #completion-counter {
-	font-family: HelveticaNeueLt;
-	color: rgb(200,200,200);
+    font-family: HelveticaNeueLt;
+    color: rgb(200,200,200);
 }
 #turns-taken, #completion-taken {
-	font-family: HelveticaNeueUltLt;
-	font-size: 36px;
-	color: rgb(230,230,230);
+    font-family: HelveticaNeueUltLt;
+    font-size: 36px;
+    color: rgb(230,230,230);
 }
 #turns-label, #completion-label {
-	font-size: 12px;
-	color: rgb(100,100,100);
+    font-size: 12px;
+    color: rgb(100,100,100);
 }
 b {
-	font-family: HelveticaNeue;
+    font-family: HelveticaNeue;
 }
