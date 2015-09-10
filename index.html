@@ -1,64 +1,62 @@
-<!DOCTYPE html>
-<html lang="en">
+    <!DOCTYPE html>
+    <html lang="en">
 
-	<head>
-		<title>Color Game</title>
+        <head>
+            <title>Color Game</title>
 
-		<script type="text/javascript" src="lib/jquery.min.js"></script>
-		<script type="text/javascript" src="lib/jquery.ui.widget.min.js"></script>
-		<script type="text/javascript" src="lib/jquery.ui.effect.min.js"></script>
-		<script type="text/javascript" src="lib/jquery.easyHover.js"></script>
-	
-		<script type="text/javascript" src="js/colorGame.js"></script>
+            <script type="text/javascript" src="lib/jquery.min.js"></script>
+            <script type="text/javascript" src="lib/jquery.ui.widget.min.js"></script>
+            <script type="text/javascript" src="lib/jquery.ui.effect.min.js"></script>
+            <script type="text/javascript" src="lib/jquery.easyHover.js"></script>
 
-		<link rel="stylesheet" type="text/css" href="css/reset.css" />
-		<link rel="stylesheet" type="text/css" href="css/fonts.css" />
-		<link rel="stylesheet" type="text/css" href="css/util.css" />
-		<link rel="stylesheet" type="text/css" href="css/main.css" />
+            <script type="text/javascript" src="js/colorGame.js"></script>
 
-	</head>
+            <link rel="stylesheet" type="text/css" href="css/reset.css" />
+            <link rel="stylesheet" type="text/css" href="css/fonts.css" />
+            <link rel="stylesheet" type="text/css" href="css/util.css" />
+            <link rel="stylesheet" type="text/css" href="css/main.css" />
 
-	<body>
-		<div id="container">
-			<h1>Color Game</h1>
-		
-			
+        </head>
 
-			<div id="firstDivider" class="divider"></div>
+        <body>
+            <div id="container">
+                <h1>Color Game</h1>
 
-			<div id="hud" class="wrapper">
-				<img id="start-marker" class="pull-left" src="assets/images/start_here.png" />
+                <div id="firstDivider" class="divider"></div>
 
-				<div id="turns-container" class="pull-right">
-					<div id="turns-counter">
-						<span id="turns-taken">50</span>
-						<span id="turns-separator">/</span>
-						<span id="turns-total">100</span>
-					</div>
-					<div id="turns-label">DICKS TAKEN</div>
-				</div>
+                <div id="hud" class="wrapper">
+                    <img id="start-marker" class="pull-left" src="assets/images/start_here.png" />
 
-				<div id="completion-container" class="pull-right">
-					<div id="completion-counter">
-						<span id="completion-taken">78</span>
-						<span id="completion-separator">/</span>
-						<span id="completion-total">126</span>
-					</div>
-					<div id="completion-label">DICKS CONTROLLED</div>
-				</div>
-			</div>
+                    <div id="turns-container" class="pull-right">
+                        <div id="turns-counter">
+                            <span id="turns-taken">50</span>
+                            <span id="turns-separator">/</span>
+                            <span id="turns-total">100</span>
+                        </div>
+                        <div id="turns-label">DICKS TAKEN</div>
+                    </div>
 
-			<div id="game">
-				<div id="canvas"></div>
-				<div id="controlBar"></div>
-			</div>
+                    <div id="completion-container" class="pull-right">
+                        <div id="completion-counter">
+                            <span id="completion-taken">78</span>
+                            <span id="completion-separator">/</span>
+                            <span id="completion-total">126</span>
+                        </div>
+                        <div id="completion-label">DICKS CONTROLLED</div>
+                    </div>
+                </div>
 
-			<div class="divider"></div>
+                <div id="game">
+                    <div id="canvas"></div>
+                    <div id="controlBar"></div>
+                </div>
 
-			<div id="controls">
-				<div class="button" id="newgame-btn">New Game</div>
-			</div>
-		</div>
-	</body>
+                <div class="divider"></div>
+
+                <div id="controls">
+                    <div class="button" id="newgame-btn">New Game</div>
+                </div>
+            </div>
+        </body>
 
 </html>
