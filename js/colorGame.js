@@ -26,7 +26,7 @@ var OPACITY_HOVER = 0.0;
 
 // tile states
 var STATE_CONTROLLED = "controlled";
-var STATE_DORMANT 	 = "dormant";
+var STATE_DORMANT = "dormant";
 
 function Game() {
 
